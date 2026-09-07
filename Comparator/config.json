@@ -1,0 +1,13 @@
+{
+  "challenge_module": "Comparator.Challenge",
+  "solution_module": "Comparator.Solution",
+  "theorem_names": [
+    "Comparator.pure_wz2_theorem5_2_unconditional"
+  ],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ],
+  "enable_nanoda": false
+}

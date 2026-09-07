@@ -1,0 +1,16 @@
+name = "MyLeanRepo"
+version = "0.1.0"
+defaultTargets = ["MyLeanRepo"]
+moreLeanArgs = ["-DautoImplicit=false", "-Dlinter.all=false"]
+weakLeanArgs = ["--tstack=8192"]
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.32.0-rc1"
+
+[[lean_lib]]
+name = "MyLeanRepo"
+
+[[lean_lib]]
+name = "Comparator"
