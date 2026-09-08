@@ -4,7 +4,8 @@ defaultTargets = ["MyLeanRepo"]
 
 [[require]]
 name = "mathlib"
-path = ".lake/packages/mathlib"
+scope = "leanprover-community"
+rev = "v4.32.0-rc1"
 
 [[lean_lib]]
 name = "MyLeanRepo"
