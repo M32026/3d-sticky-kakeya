@@ -9,9 +9,9 @@ Derives:
 - topSphereHomologyIsoZ2: H_n(S^n; Z/2) ≅ Z/2 for n ≥ 1
 -/
 
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.Degree.Homology
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.SingularHomology.EuclideanSpace.StdSphereHomology
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.SingularHomology.EuclideanSpace.TopSphereHomology
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.Degree.Homology
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.SingularHomology.EuclideanSpace.StdSphereHomology
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.SingularHomology.EuclideanSpace.TopSphereHomology
 import Mathlib.Algebra.Homology.HomologySequence
 import Mathlib.Algebra.Homology.HomologicalComplexAbelian
 import Mathlib.Algebra.Category.Grp.AB
@@ -20,7 +20,7 @@ import Mathlib.AlgebraicTopology.SingularHomology.HomologyZero
 noncomputable section
 
 open AlgebraicTopology CategoryTheory Limits HomologicalComplex Simplicial Preadditive
-open Vendored.AlgebraicTopology.Degree
+open SeedMathlib.AlgebraicTopology.Degree
 
 variable {n : ℕ}
 

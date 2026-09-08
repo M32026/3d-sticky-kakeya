@@ -14,7 +14,7 @@ section
 open MeasureTheory Metric Set Finset Classical
 open scoped ENNReal NNReal
 
-namespace Vendored.MeasureTheory.FractalGeometry.FrostmanLemma
+namespace SeedMathlib.MeasureTheory.FractalGeometry.FrostmanLemma
 
 variable {n : ℕ} {s : ℝ}
 
@@ -34,5 +34,5 @@ lemma externalCoveringNumber_eq_encard_of_separated
     Metric.packingNumber_two_mul_le_externalCoveringNumber δ P
   exact le_antisymm h1 (h2.trans h3)
 
-end Vendored.MeasureTheory.FractalGeometry.FrostmanLemma
+end SeedMathlib.MeasureTheory.FractalGeometry.FrostmanLemma
 end

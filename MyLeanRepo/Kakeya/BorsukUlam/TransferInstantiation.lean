@@ -16,7 +16,7 @@ noncomputable section
 namespace BorsukUlamBackup
 
 open AlgebraicTopology CategoryTheory Limits HomologicalComplex Simplicial Preadditive
-open Vendored.AlgebraicTopology.Degree
+open SeedMathlib.AlgebraicTopology.Degree
 
 variable {n : ℕ}
 

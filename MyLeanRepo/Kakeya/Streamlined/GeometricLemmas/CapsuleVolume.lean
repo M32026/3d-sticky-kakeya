@@ -707,6 +707,101 @@ lemma capsule_subset_union (r : ℝ) (hr : 0 < r) :
         simpa [cylRegion] using ⟨h_x0_in.1, h_x0_in.2, h8⟩
       exact Or.inl (Or.inl h_cyl)
 
+/-- Improved subset: capsule ⊆ cylinder ∪ left half-ball ∪ right half-ball.
+
+This is tighter than `capsule_subset_union` because it uses half-balls
+instead of full balls, giving the exact volume. -/
+lemma capsule_subset_halfballs (r : ℝ) (hr : 0 < r) :
+    capsule r ⊆ cylRegion r ∪ leftHalfBall r ∪ rightHalfBall r := by
+  let e0 : Point3 := EuclideanSpace.single 0 1
+  have h_norm2 : ∀ (x : Point3) (t : ℝ), ‖x - t • e0‖ ^ 2 = (x 0 - t) ^ 2 + (x 1) ^ 2 + (x 2) ^ 2 := by
+    intro x t
+    let z := x - t • e0
+    have hz0 : z 0 = x 0 - t := by simp [z, e0, EuclideanSpace.single] <;> ring
+    have hz1 : z 1 = x 1 := by simp [z, e0, EuclideanSpace.single] <;> ring
+    have hz2 : z 2 = x 2 := by simp [z, e0, EuclideanSpace.single] <;> ring
+    have h_norm : ‖z‖ ^ 2 = (z 0) ^ 2 + (z 1) ^ 2 + (z 2) ^ 2 := by
+      have h : ‖z‖ ^ 2 = ∑ i : Fin 3, (z i) ^ 2 := by
+        rw [←real_inner_self_eq_norm_sq, PiLp.inner_apply] <;> congr with i <;> simp
+      rw [h]
+      simp [Fin.sum_univ_succ] <;> ring
+    rw [h_norm, hz0, hz1, hz2] <;> ring
+  have h_seg_nonempty : unitSegment0e0.Nonempty := by
+    refine ⟨0, ?_⟩
+    refine ⟨0, by norm_num, ?_⟩
+    simp [unitSegment0e0, unitSegment, e0, EuclideanSpace.single]
+  have h_seg_form : ∀ z ∈ unitSegment0e0, ∃ (t : ℝ), 0 ≤ t ∧ t ≤ 1 ∧ z = t • e0 := by
+    intro z hz
+    rcases hz with ⟨t, ht, rfl⟩
+    exact ⟨t, ht.1, ht.2, by simp [e0, EuclideanSpace.single] <;> ring⟩
+  intro x hx
+  have h_infEDist : infEDist x unitSegment0e0 ≤ ENNReal.ofReal r := hx
+  have h_infDist_le : infDist x unitSegment0e0 ≤ r := by
+    rw [Metric.infDist]
+    have h_toReal : (ENNReal.ofReal r).toReal = r := ENNReal.toReal_ofReal (by linarith)
+    have h : (infEDist x unitSegment0e0).toReal ≤ (ENNReal.ofReal r).toReal :=
+      ENNReal.toReal_mono ENNReal.ofReal_ne_top h_infEDist
+    rw [h_toReal] at h
+    exact h
+  by_cases h_left : x 0 < 0
+  · have h_lower : ∀ z ∈ unitSegment0e0, ‖x‖ ≤ ‖x - z‖ := by
+      intro z hz
+      rcases h_seg_form z hz with ⟨t, ht0, ht1, rfl⟩
+      have h : ‖x - t • e0‖ ^ 2 ≥ ‖x‖ ^ 2 := by
+        rw [h_norm2 x t]
+        have h4 : ‖x‖ ^ 2 = (x 0) ^ 2 + (x 1) ^ 2 + (x 2) ^ 2 := by
+          have h5 := h_norm2 x 0
+          simpa using h5
+        rw [h4] <;> nlinarith
+      have h5 : 0 ≤ ‖x - t • e0‖ := by positivity
+      have h6 : 0 ≤ ‖x‖ := by positivity
+      nlinarith
+    have h_infDist_ge : ‖x‖ ≤ infDist x unitSegment0e0 := by
+      rw [Metric.le_infDist h_seg_nonempty]; exact h_lower
+    have h_ball : ‖x‖ ≤ r := by linarith
+    have h_left' : x 0 ≤ 0 := by linarith
+    have h_half : x ∈ leftHalfBall r := by
+      simpa [leftHalfBall] using ⟨h_left', h_ball⟩
+    exact Or.inl (Or.inr h_half)
+  · by_cases h_right : 1 < x 0
+    · have h_lower : ∀ z ∈ unitSegment0e0, ‖x - e0‖ ≤ ‖x - z‖ := by
+        intro z hz
+        rcases h_seg_form z hz with ⟨t, ht0, ht1, rfl⟩
+        have h : ‖x - t • e0‖ ^ 2 ≥ ‖x - e0‖ ^ 2 := by
+          rw [h_norm2 x t]
+          have h4 : ‖x - e0‖ ^ 2 = (x 0 - 1) ^ 2 + (x 1) ^ 2 + (x 2) ^ 2 := by
+            have h5 := h_norm2 x 1
+            simpa [e0, EuclideanSpace.single] using h5
+          rw [h4] <;> nlinarith
+        have h5 : 0 ≤ ‖x - t • e0‖ := by positivity
+        have h6 : 0 ≤ ‖x - e0‖ := by positivity
+        nlinarith
+      have h_infDist_ge : ‖x - e0‖ ≤ infDist x unitSegment0e0 := by
+        rw [Metric.le_infDist h_seg_nonempty]; exact h_lower
+      have h_ball : ‖x - e0‖ ≤ r := by linarith
+      have h_right' : x 0 ≥ 1 := by linarith
+      have h_half : x ∈ rightHalfBall r := by
+        simpa [rightHalfBall, e0, dist_eq_norm] using ⟨h_right', h_ball⟩
+      exact Or.inr h_half
+    · have h_x0_in : 0 ≤ x 0 ∧ x 0 ≤ 1 := by constructor <;> linarith
+      have h_lower : ∀ z ∈ unitSegment0e0, Real.sqrt ((x 1) ^ 2 + (x 2) ^ 2) ≤ ‖x - z‖ := by
+        intro z hz
+        rcases h_seg_form z hz with ⟨t, ht0, ht1, rfl⟩
+        have h2 : (x 1) ^ 2 + (x 2) ^ 2 ≤ ‖x - t • e0‖ ^ 2 := by
+          rw [h_norm2 x t] <;> nlinarith
+        have h5 : 0 ≤ (x 1) ^ 2 + (x 2) ^ 2 := by positivity
+        have h6 : 0 ≤ ‖x - t • e0‖ := by positivity
+        exact (Real.sqrt_le_left h6).mpr h2
+      have h_infDist_ge : Real.sqrt ((x 1) ^ 2 + (x 2) ^ 2) ≤ infDist x unitSegment0e0 := by
+        rw [Metric.le_infDist h_seg_nonempty]; exact h_lower
+      have h7 : Real.sqrt ((x 1) ^ 2 + (x 2) ^ 2) ≤ r := by linarith
+      have h8 : (x 1) ^ 2 + (x 2) ^ 2 ≤ r ^ 2 := by
+        have h9 : 0 ≤ r := by linarith
+        nlinarith [Real.sqrt_le_iff.mp h7]
+      have h_cyl : x ∈ cylRegion r := by
+        simpa [cylRegion] using ⟨h_x0_in.1, h_x0_in.2, h8⟩
+      exact Or.inl (Or.inl h_cyl)
+
 /-! ### Main bounds -/
 
 /-- Lower bound: capsule volume ≥ πr² + (4/3)πr³. -/
@@ -863,5 +958,84 @@ theorem capsule_volume_upper (r : ℝ) (hr : 0 < r) :
         ENNReal.ofReal ((4 / 3 : ℝ) * Real.pi * r ^ 3)) := by abel
   rw [h_assoc] at h_bound
   exact le_trans h_bound h_final
+
+/-- Exact capsule volume: πr² + (4/3)πr³.
+
+The capsule is the disjoint union of a cylinder (length 1, radius r)
+and two hemispherical caps. -/
+theorem capsule_volume_exact (r : ℝ) (hr : 0 < r) :
+    volume (capsule r) =
+      ENNReal.ofReal (Real.pi * r ^ 2 + (4 / 3 : ℝ) * Real.pi * r ^ 3) := by
+  set A := cylRegion r with hA_def
+  set B := leftHalfBall r with hB_def
+  set C := rightHalfBall r with hC_def
+  have h_contain : A ⊆ capsule r ∧ B ⊆ capsule r ∧ C ⊆ capsule r :=
+    capsule_contains_parts r hr
+  have h_subset : capsule r ⊆ A ∪ B ∪ C := capsule_subset_halfballs r hr
+  have h_cover : A ∪ B ∪ C ⊆ capsule r := by
+    intro x hx
+    rcases hx with (h | h)
+    · rcases h with (h | h)
+      · exact h_contain.1 h
+      · exact h_contain.2.1 h
+    · exact h_contain.2.2 h
+  have h_eq : capsule r = A ∪ B ∪ C :=
+    Set.Subset.antisymm h_subset h_cover
+  have h_disj := capsule_regions_disjoint r hr
+  have hA_meas : MeasurableSet A := by
+    have hc0 : Continuous (fun x : Point3 => x 0) := by fun_prop
+    have hc12 : Continuous (fun x : Point3 => (x 1) ^ 2 + (x 2) ^ 2) := by fun_prop
+    exact ((isClosed_Ici.preimage hc0).inter
+      ((isClosed_Iic.preimage hc0).inter (isClosed_Iic.preimage hc12))).measurableSet
+  have hB_meas : MeasurableSet B := by
+    have hc0 : Continuous (fun x : Point3 => x 0) := by fun_prop
+    have h1 : IsClosed {x : Point3 | x 0 ≤ 0} := isClosed_Iic.preimage hc0
+    have h2 : IsClosed (Metric.closedBall (0 : Point3) r) := isClosed_closedBall
+    have h3 : B = {x | x 0 ≤ 0} ∩ Metric.closedBall (0 : Point3) r := by
+      ext y; simp [B, leftHalfBall, Metric.mem_closedBall, dist_zero_right] <;> rfl
+    rw [h3]; exact (h1.inter h2).measurableSet
+  have hC_meas : MeasurableSet C := by
+    have hc0 : Continuous (fun x : Point3 => x 0) := by fun_prop
+    let e0 : Point3 := EuclideanSpace.single 0 1
+    have h1 : IsClosed {x : Point3 | x 0 ≥ 1} := isClosed_Ici.preimage hc0
+    have h2 : IsClosed (Metric.closedBall e0 r) := isClosed_closedBall
+    have h3 : C = {x | x 0 ≥ 1} ∩ Metric.closedBall e0 r := by
+      ext y
+      simp only [C, rightHalfBall, Set.mem_inter_iff, Set.mem_setOf_eq, Metric.mem_closedBall]
+      <;> simp [e0, dist_eq_norm] <;> rfl
+    rw [h3]; exact (h1.inter h2).measurableSet
+  have hAB : volume (A ∩ B) = 0 := h_disj.1
+  have hAC : volume (A ∩ C) = 0 := h_disj.2.1
+  have hBC : volume (B ∩ C) = 0 := h_disj.2.2
+  have h1 : volume (A ∪ B) = volume A + volume B := by
+    have h_eq : volume (A ∪ B) + volume (A ∩ B) = volume A + volume B :=
+      measure_union_add_inter A hB_meas
+    rw [hAB] at h_eq; simpa using h_eq
+  have h_inter2 : volume ((A ∪ B) ∩ C) = 0 := by
+    have h_eq : (A ∪ B) ∩ C = (A ∩ C) ∪ (B ∩ C) := by
+      ext x; simp [Set.mem_inter_iff, Set.mem_union] <;> tauto
+    rw [h_eq]
+    have h_le : volume ((A ∩ C) ∪ (B ∩ C)) ≤ volume (A ∩ C) + volume (B ∩ C) :=
+      measure_union_le _ _
+    have h_rhs : volume (A ∩ C) + volume (B ∩ C) = 0 := by
+      rw [hAC, hBC] <;> simp
+    have h_le0 : volume ((A ∩ C) ∪ (B ∩ C)) ≤ 0 := by
+      rw [h_rhs] at h_le; exact h_le
+    exact bot_unique h_le0
+  have h2 : volume ((A ∪ B) ∪ C) = volume (A ∪ B) + volume C := by
+    have h_eq : volume ((A ∪ B) ∪ C) + volume ((A ∪ B) ∩ C) = volume (A ∪ B) + volume C :=
+      measure_union_add_inter (A ∪ B) hC_meas
+    rw [h_inter2] at h_eq; simpa using h_eq
+  have h3 : A ∪ B ∪ C = (A ∪ B) ∪ C := by rw [Set.union_assoc]
+  have h_vol_union : volume (A ∪ B ∪ C) = volume A + volume B + volume C := by
+    rw [h3, h2, h1] <;> ring
+  rw [h_eq, h_vol_union]
+  rw [cylinder_volume_aligned r hr, leftHalfBall_volume r hr, rightHalfBall_volume r hr]
+  have h_pos1 : 0 ≤ Real.pi * r ^ 2 := by positivity
+  have h_pos2 : 0 ≤ (2 / 3 : ℝ) * Real.pi * r ^ 3 := by positivity
+  rw [←ENNReal.ofReal_add h_pos1 h_pos2]
+  have h_pos3 : 0 ≤ (2 / 3 : ℝ) * Real.pi * r ^ 3 := by positivity
+  rw [←ENNReal.ofReal_add (by linarith) h_pos3]
+  <;> congr 1 <;> ring
 
 end Kakeya.Streamlined.GeometricLemmas

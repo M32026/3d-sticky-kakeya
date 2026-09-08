@@ -11,7 +11,7 @@ import MyLeanRepo.Kakeya.Assouad.TwistedProjectionScale.TubeParameters
 
 The corresponding one-sorry targets live in `Assouad/Targets`.  These
 statements deliberately expose the paper's intermediate interfaces rather
-than attempting to prove the complete theorem in one run.
+than asking SeedProver to prove the complete theorem in one run.
 -/
 
 noncomputable section

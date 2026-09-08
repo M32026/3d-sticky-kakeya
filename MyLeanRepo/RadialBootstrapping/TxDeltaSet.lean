@@ -24,7 +24,7 @@ noncomputable section
 
 namespace RadialBootstrapping
 
-open Vendored.MeasureTheory.FractalGeometry.FrostmanLemma
+open SeedMathlib.MeasureTheory.FractalGeometry.FrostmanLemma
 
 /-- r-tube around L' intersected with unit ball is contained in ρ-tube around L. -/
 def tubeContainedInTube (L L' : Line2) (r ρ : ℝ) : Prop :=

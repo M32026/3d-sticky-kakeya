@@ -39,7 +39,7 @@ Whiteprint node: non-concentrated-case
 -/
 
 open MeasureTheory Metric Set Finset
-open Vendored.MeasureTheory.FractalGeometry.FrostmanLemma
+open SeedMathlib.MeasureTheory.FractalGeometry.FrostmanLemma
 open scoped Classical
 
 noncomputable section

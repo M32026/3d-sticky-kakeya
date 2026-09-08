@@ -14,13 +14,13 @@ import MyLeanRepo.Kakeya.BorsukUlam.OddDegreeHomology
 import MyLeanRepo.Kakeya.BorsukUlam.FCId
 import MyLeanRepo.Kakeya.BorsukUlam.Mod2Degree
 import MyLeanRepo.Kakeya.BorsukUlam.BackupRoute.CategoryBridge
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.Degree.Homology
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.Degree.Homology
 import Mathlib.Algebra.Homology.HomologySequenceLemmas
 
 noncomputable section
 
 open AlgebraicTopology CategoryTheory Limits HomologicalComplex
-open Vendored.AlgebraicTopology.Degree
+open SeedMathlib.AlgebraicTopology.Degree
 open BorsukUlamBackup
 open BorsukUlam.OddDegreeHomology
 

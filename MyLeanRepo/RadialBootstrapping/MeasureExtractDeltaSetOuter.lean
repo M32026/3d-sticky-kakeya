@@ -21,7 +21,7 @@ set_option maxHeartbeats 1000000
 
 open MeasureTheory Metric Set Finset Classical
 open scoped ENNReal NNReal
-open Vendored.MeasureTheory.FractalGeometry.FrostmanLemma
+open SeedMathlib.MeasureTheory.FractalGeometry.FrostmanLemma
 
 noncomputable section
 
@@ -859,7 +859,7 @@ theorem measure_extract_delta_set_explicit_outer
   have hE_bounded : Bornology.IsBounded E :=
     Metric.isBounded_closedBall.subset hE_sub_ball
   have h_pack_ne_top : Metric.packingNumber εn E ≠ ⊤ :=
-    Vendored.MeasureTheory.FractalGeometry.FrostmanLemma.bounded_packingNumber_ne_top hE_bounded hε_pos
+    SeedMathlib.MeasureTheory.FractalGeometry.FrostmanLemma.bounded_packingNumber_ne_top hE_bounded hε_pos
   let P0 : Set Point := Metric.maximalSeparatedSet εn E
   have hP0_sub : P0 ⊆ E := Metric.maximalSeparatedSet_subset (ε := εn) (A := E)
   have hP0_sep : Metric.IsSeparated εn P0 := Metric.isSeparated_maximalSeparatedSet (ε := εn)

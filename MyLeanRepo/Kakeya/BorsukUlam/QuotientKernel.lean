@@ -19,7 +19,7 @@ import MyLeanRepo.Kakeya.BorsukUlam.TransferFull
 noncomputable section
 
 open AlgebraicTopology CategoryTheory Limits HomologicalComplex Simplicial Preadditive
-open Vendored.AlgebraicTopology.Degree
+open SeedMathlib.AlgebraicTopology.Degree
 open AlgebraicTopology.StdSphereHomology
 open BorsukUlamBackup
 open BorsukUlam.BackupRoute

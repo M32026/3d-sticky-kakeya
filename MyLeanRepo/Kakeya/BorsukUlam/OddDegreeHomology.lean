@@ -33,7 +33,7 @@ import Mathlib.Algebra.Homology.ShortComplex.ShortExact
 noncomputable section
 
 open AlgebraicTopology CategoryTheory Limits HomologicalComplex Simplicial Preadditive
-open Vendored.AlgebraicTopology.Degree
+open SeedMathlib.AlgebraicTopology.Degree
 open BorsukUlamBackup
 open BorsukUlam.H0BaseCase
 

@@ -600,7 +600,7 @@ lemma katz_tao_estimate_one : KatzTaoEstimate 1 := by
 `KatzTaoEstimate β`. -/
 theorem iteration_lemma (hML1 : MainLemma1Statement)
     (hML2 : MainLemma2Statement)
-    (hSticky : StickyKakeyaHypothesis)
+    (hSticky : GWZStickyVolumeSocket)
     (hVNS : VeryNotStickyStatement) :
     ∀ (β0 : ℝ), 0 < β0 → ∃ (β : ℝ), 0 ≤ β ∧ β < β0 ∧ KatzTaoEstimate β := by
   rcases hML2 hSticky hVNS with ⟨ν, hν_mono, hν_prop⟩
@@ -846,7 +846,7 @@ theorem final_derivation (h : ∀ (α : ℝ), 0 < α → α ≤ 1 → KatzTaoEst
            = Kakeya.realRpowENN δ ε * (Kakeya.realRpowENN δ η * F.nominalMass) := by
              have h : Kakeya.realRpowENN δ (η + ε) =
                  Kakeya.realRpowENN δ ε * Kakeya.realRpowENN δ η := by
-               rw [← realRpowENN_add hδ_pos] <;> ring
+               rw [← realRpowENN_add hδ_pos] <;> ring_nf
              rw [h] <;> simp [mul_assoc]
          _ ≤ Kakeya.realRpowENN δ ε * (Kakeya.realRpowENN δ (-ε) * P * volume Y.union) := by
              gcongr

@@ -8,8 +8,9 @@ import MyLeanRepo.Kakeya.Geometry.JohnEllipsoid.Uniqueness
 # Full outer John ellipsoid theorem
 
 Adapted from `full_john_ellipsoid.tar.gz`; the source project records
-upstream mathlib-extension commit `fe432d890160909112d6017e5fbced1eff9418de`.
+SeedMathlib commit `fe432d890160909112d6017e5fbced1eff9418de`.
 -/
+
 
 
 noncomputable section

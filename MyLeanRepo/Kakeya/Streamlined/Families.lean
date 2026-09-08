@@ -7,6 +7,12 @@ import Mathlib.Topology.MetricSpace.Thickening
 
 Families are indexed by `Fin card`.  Thus two members may have identical
 geometric carriers while retaining different identities and multiplicities.
+
+`Factoring` is the authoritative partition-bookkeeping structure.  Its fibers
+are inverse images of one chosen parent map and therefore form a disjoint
+partition.  Geometric full-containment fibers are defined separately on tube
+families; they may overlap and must never be used with factoring identities
+without an explicit bridge.
 -/
 
 noncomputable section
@@ -61,6 +67,17 @@ def containedCount (F : BodyFamily) (K : Set Point3) : ENNReal :=
 /-- Total volume of indexed members contained in `K`. -/
 def containedMass (F : BodyFamily) (K : Set Point3) : ENNReal :=
   ∑ i ∈ F.containedIndices K, (F.body i).volume
+
+/-- `containedMass` is monotone in the containing set. -/
+lemma containedMass_mono (F : BodyFamily) {K K' : Set Point3} (h : K ⊆ K') :
+    F.containedMass K ≤ F.containedMass K' := by
+  have h1 : F.containedIndices K ⊆ F.containedIndices K' := by
+    intro i hi
+    have h2 : (F.body i).carrier ⊆ K := by
+      simpa [BodyFamily.containedIndices] using hi
+    have h3 : (F.body i).carrier ⊆ K' := subset_trans h2 h
+    simpa [BodyFamily.containedIndices] using h3
+  exact Finset.sum_le_sum_of_subset_of_nonneg h1 (fun i _ _ => by positivity)
 
 /-- Every carrier is measurable. -/
 def IsMeasurable (F : BodyFamily) : Prop :=
@@ -164,6 +181,181 @@ def fiberIndices {fine coarse : BodyFamily} (P : Factoring fine coarse)
   classical
   exact Finset.univ.filter fun i => P.parent i = j
 
+/-- Cardinality of one parent fiber. -/
+def fiberCount {fine coarse : BodyFamily} (P : Factoring fine coarse)
+    (j : Fin coarse.card) : ENNReal :=
+  (P.fiberIndices j).card
+
+/-- Cardinalities of all fibers of a factoring are `C`-uniform. -/
+def FibersAreCUniform {fine coarse : BodyFamily}
+    (P : Factoring fine coarse) (C : ENNReal) : Prop :=
+  1 ≤ C ∧
+    ∀ first second,
+      P.fiberCount first ≤ C * P.fiberCount second
+
+/-- Surjectivity makes every factoring fiber nonempty. -/
+lemma one_le_fiberCount {fine coarse : BodyFamily}
+    (P : Factoring fine coarse) (j : Fin coarse.card) :
+    1 ≤ P.fiberCount j := by
+  rcases P.parent_surjective j with ⟨i, hi⟩
+  unfold fiberCount fiberIndices
+  exact_mod_cast
+    (Finset.one_le_card.mpr
+      ⟨i, Finset.mem_filter.mpr ⟨Finset.mem_univ i, hi⟩⟩)
+
+/-- A factoring fiber has at most the ambient fine cardinality. -/
+lemma fiberCount_le_enncard {fine coarse : BodyFamily}
+    (P : Factoring fine coarse) (j : Fin coarse.card) :
+    P.fiberCount j ≤ fine.enncard := by
+  have hcard : (P.fiberIndices j).card ≤ fine.card := by
+    simpa using
+      (Finset.card_le_card
+        (Finset.subset_univ (P.fiberIndices j)))
+  unfold fiberCount BodyFamily.enncard
+  exact_mod_cast hcard
+
+/--
+Every factoring is crudely fiber-uniform once the comparison constant
+dominates the ambient fine cardinality.
+-/
+lemma fibersAreCUniform_of_enncard_le
+    {fine coarse : BodyFamily} (P : Factoring fine coarse) {C : ENNReal}
+    (hC : 1 ≤ C) (hcard : fine.enncard ≤ C) :
+    P.FibersAreCUniform C := by
+  refine ⟨hC, ?_⟩
+  intro first second
+  calc
+    P.fiberCount first ≤ fine.enncard :=
+      P.fiberCount_le_enncard first
+    _ ≤ C := hcard
+    _ ≤ C * P.fiberCount second := by
+      simpa using mul_le_mul_right (P.one_le_fiberCount second) C
+
+/-- The parent fibers partition all fine indices. -/
+lemma sum_fiberCount {fine coarse : BodyFamily}
+    (P : Factoring fine coarse) :
+    ∑ j : Fin coarse.card, P.fiberCount j = fine.enncard := by
+  classical
+  have hsum :
+      ∑ j : Fin coarse.card,
+          ((Finset.univ.filter fun i : Fin fine.card =>
+            P.parent i = j).card : ℕ) =
+        fine.card := by
+    calc
+      ∑ j : Fin coarse.card,
+          (Finset.univ.filter fun i : Fin fine.card =>
+            P.parent i = j).card
+          = (Finset.univ : Finset (Fin fine.card)).card := by
+        symm
+        exact Finset.card_eq_sum_card_fiberwise
+          (fun i _ => Finset.mem_univ (P.parent i))
+      _ = fine.card := by simp
+  change
+    ∑ j : Fin coarse.card,
+        ((Finset.univ.filter fun i : Fin fine.card =>
+          P.parent i = j).card : ENNReal) =
+      (fine.card : ENNReal)
+  exact_mod_cast hsum
+
+/-- Fine indices whose factoring parent lies in `I`. -/
+def fiberIndicesOver {fine coarse : BodyFamily}
+    (P : Factoring fine coarse) (I : Finset (Fin coarse.card)) :
+    Finset (Fin fine.card) := by
+  classical
+  exact Finset.univ.filter fun i => P.parent i ∈ I
+
+@[simp]
+lemma mem_fiberIndicesOver_iff {fine coarse : BodyFamily}
+    (P : Factoring fine coarse) (I : Finset (Fin coarse.card))
+    (i : Fin fine.card) :
+    i ∈ P.fiberIndicesOver I ↔ P.parent i ∈ I := by
+  simp [fiberIndicesOver]
+
+/-- A parent-set preimage is the disjoint union of its factoring fibers. -/
+lemma fiberIndicesOver_card {fine coarse : BodyFamily}
+    (P : Factoring fine coarse) (I : Finset (Fin coarse.card)) :
+    ((P.fiberIndicesOver I).card : ENNReal) =
+      ∑ j ∈ I, P.fiberCount j := by
+  classical
+  have hnat :
+      (P.fiberIndicesOver I).card =
+        ∑ j ∈ I,
+          (Finset.univ.filter fun i : Fin fine.card =>
+            P.parent i = j).card := by
+    have hmaps :
+        Set.MapsTo P.parent
+          (↑(P.fiberIndicesOver I) : Set (Fin fine.card))
+          (↑I : Set (Fin coarse.card)) := by
+      intro i hi
+      exact (P.mem_fiberIndicesOver_iff I i).mp hi
+    have h :=
+      Finset.card_eq_sum_card_fiberwise
+        (s := P.fiberIndicesOver I) (t := I) hmaps
+    calc
+      (P.fiberIndicesOver I).card
+          = ∑ j ∈ I,
+              ((P.fiberIndicesOver I).filter fun i =>
+                P.parent i = j).card := h
+      _ = ∑ j ∈ I,
+            (Finset.univ.filter fun i : Fin fine.card =>
+              P.parent i = j).card := by
+        apply Finset.sum_congr rfl
+        intro j hj
+        congr 1
+        ext i
+        constructor
+        · intro hi
+          exact Finset.mem_filter.mpr
+            ⟨Finset.mem_univ i, (Finset.mem_filter.mp hi).2⟩
+        · intro hi
+          have hparent : P.parent i ∈ I := by
+            rw [(Finset.mem_filter.mp hi).2]
+            exact hj
+          exact Finset.mem_filter.mpr
+            ⟨(P.mem_fiberIndicesOver_iff I i).mpr hparent,
+              (Finset.mem_filter.mp hi).2⟩
+  change ((P.fiberIndicesOver I).card : ENNReal) =
+    ∑ j ∈ I,
+      ((Finset.univ.filter fun i : Fin fine.card =>
+        P.parent i = j).card : ENNReal)
+  exact_mod_cast hnat
+
+/--
+Fiber uniformity gives the exact counting inequality for a parent-set
+preimage.
+-/
+lemma parentCard_mul_fineCard_le_uniformity_mul_coarseCard_mul_overCard
+    {fine coarse : BodyFamily}
+    (P : Factoring fine coarse) {C : ENNReal}
+    (huniform : P.FibersAreCUniform C)
+    (I : Finset (Fin coarse.card)) :
+    (I.card : ENNReal) * fine.enncard ≤
+      C * (coarse.card : ENNReal) *
+        (P.fiberIndicesOver I).card := by
+  rw [← P.sum_fiberCount, P.fiberIndicesOver_card I]
+  calc
+    (I.card : ENNReal) *
+          (∑ k : Fin coarse.card, P.fiberCount k)
+        = ∑ k : Fin coarse.card,
+            (I.card : ENNReal) * P.fiberCount k := by
+      rw [Finset.mul_sum]
+    _ = ∑ k : Fin coarse.card,
+          ∑ _j ∈ I, P.fiberCount k := by
+      apply Finset.sum_congr rfl
+      intro k _
+      simp [Finset.sum_const, nsmul_eq_mul]
+    _ ≤ ∑ _k : Fin coarse.card,
+          ∑ j ∈ I, C * P.fiberCount j := by
+      apply Finset.sum_le_sum
+      intro k _
+      apply Finset.sum_le_sum
+      intro j _
+      exact huniform.2 k j
+    _ = C * (coarse.card : ENNReal) *
+          (∑ j ∈ I, P.fiberCount j) := by
+      simp [Finset.sum_const, Finset.mul_sum, nsmul_eq_mul]
+      ring
+
 /-- Total fine mass in a parent fiber. -/
 def fiberMass {fine coarse : BodyFamily} (P : Factoring fine coarse)
     (j : Fin coarse.card) : ENNReal :=
@@ -246,6 +438,42 @@ def IsEssentiallyDistinct {δ : ℝ} (F : TubeFamily δ) : Prop :=
 def Nonempty {δ : ℝ} (F : TubeFamily δ) : Prop :=
   0 < F.card
 
+/-- Fine indices geometrically contained in one coarse tube. -/
+def containedIndices {δ ρ : ℝ}
+    (fine : TubeFamily δ) (coarse : TubeFamily ρ)
+    (j : Fin coarse.card) : Finset (Fin fine.card) :=
+  fine.toBodyFamily.containedIndices (coarse.tube j).carrier
+
+@[simp]
+lemma mem_containedIndices_iff {δ ρ : ℝ}
+    {fine : TubeFamily δ} {coarse : TubeFamily ρ}
+    {j : Fin coarse.card} {i : Fin fine.card} :
+    i ∈ fine.containedIndices coarse j ↔
+      (fine.tube i).carrier ⊆ (coarse.tube j).carrier := by
+  exact BodyFamily.mem_containedIndices_iff
+
+/-- The complete geometric containment fiber over one coarse tube. -/
+def containedFamily {δ ρ : ℝ}
+    (fine : TubeFamily δ) (coarse : TubeFamily ρ)
+    (j : Fin coarse.card) : TubeFamily δ where
+  card := (fine.containedIndices coarse j).card
+  tube i := fine.tube ((fine.containedIndices coarse j).orderEmbOfFin rfl i)
+
+/-- Cardinality of one complete geometric containment fiber. -/
+def containedCount {δ ρ : ℝ}
+    (fine : TubeFamily δ) (coarse : TubeFamily ρ)
+    (j : Fin coarse.card) : ENNReal :=
+  (fine.containedIndices coarse j).card
+
+/-- Complete geometric containment fibers have comparable cardinalities. -/
+def FibersAreCUniform {δ ρ : ℝ}
+    (fine : TubeFamily δ) (coarse : TubeFamily ρ)
+    (C : ENNReal) : Prop :=
+  1 ≤ C ∧
+    ∀ first second,
+      fine.containedCount coarse first ≤
+        C * fine.containedCount coarse second
+
 end TubeFamily
 
 /-- A shading on an indexed tube family. -/
@@ -261,16 +489,161 @@ structure TubeCover {δ ρ : ℝ} (fine : TubeFamily δ) (coarse : TubeFamily ρ
 
 namespace TubeCover
 
-/-- Number of fine tubes assigned to a coarse tube. -/
-def fiberCount {δ ρ : ℝ} {fine : TubeFamily δ} {coarse : TubeFamily ρ}
+/--
+Regard a tube cover as a factoring of indexed body families.
+
+This conversion is the only entry point from tube-cover parent data to
+partition bookkeeping.  Paper-facing full-containment fibers do not use it.
+-/
+def toFactoring {δ ρ : ℝ} {fine : TubeFamily δ} {coarse : TubeFamily ρ}
+    (P : TubeCover fine coarse) :
+    Factoring fine.toBodyFamily coarse.toBodyFamily where
+  parent := P.parent
+  parent_surjective := P.parent_surjective
+  contained := P.nested
+
+lemma toFactoring_parent {δ ρ : ℝ}
+    {fine : TubeFamily δ} {coarse : TubeFamily ρ}
+    (P : TubeCover fine coarse) (i : Fin fine.card) :
+    P.toFactoring.parent i = P.parent i :=
+  rfl
+
+/-- Compatibility name for the cardinality of an assigned parent-map fiber. -/
+def fiberCount {δ ρ : ℝ}
+    {fine : TubeFamily δ} {coarse : TubeFamily ρ}
     (P : TubeCover fine coarse) (j : Fin coarse.card) : ENNReal := by
   classical
-  exact ((Finset.univ.filter fun i : Fin fine.card => P.parent i = j).card : ENNReal)
+  exact
+    ((Finset.univ.filter fun i : Fin fine.card =>
+      P.parent i = j).card : ENNReal)
 
-/-- Fiber sizes are comparable by the factor `C`. -/
+/-- The compatibility count is the canonical assigned factoring count. -/
+lemma toFactoring_fiberCount {δ ρ : ℝ}
+    {fine : TubeFamily δ} {coarse : TubeFamily ρ}
+    (P : TubeCover fine coarse) (j : Fin coarse.card) :
+    P.toFactoring.fiberCount j = P.fiberCount j :=
+  rfl
+
+/-- Compose a fine-to-middle tube cover with a middle-to-coarse cover. -/
+def comp {δ ρ σ : ℝ}
+    {fine : TubeFamily δ} {middle : TubeFamily ρ} {coarse : TubeFamily σ}
+    (inner : TubeCover fine middle) (outer : TubeCover middle coarse) :
+    TubeCover fine coarse where
+  parent i := outer.parent (inner.parent i)
+  parent_surjective := outer.parent_surjective.comp inner.parent_surjective
+  nested i := (inner.nested i).trans (outer.nested (inner.parent i))
+
+@[simp] lemma comp_parent {δ ρ σ : ℝ}
+    {fine : TubeFamily δ} {middle : TubeFamily ρ} {coarse : TubeFamily σ}
+    (inner : TubeCover fine middle) (outer : TubeCover middle coarse)
+    (i : Fin fine.card) :
+    (inner.comp outer).parent i = outer.parent (inner.parent i) := rfl
+
+/--
+The factoring fiber of a composed cover is the union of the inner factoring
+fibers over the corresponding outer factoring fiber.
+-/
+lemma comp_factoringFiberIndices {δ ρ σ : ℝ}
+    {fine : TubeFamily δ} {middle : TubeFamily ρ} {coarse : TubeFamily σ}
+    (inner : TubeCover fine middle) (outer : TubeCover middle coarse)
+    (k : Fin coarse.card) :
+    (inner.comp outer).toFactoring.fiberIndices k =
+      Finset.univ.filter fun i : Fin fine.card =>
+        inner.parent i ∈ outer.toFactoring.fiberIndices k := by
+  change
+    (Finset.univ.filter fun i : Fin fine.card =>
+      outer.parent (inner.parent i) = k) =
+      Finset.univ.filter fun i : Fin fine.card =>
+        inner.parent i ∈
+          (Finset.univ.filter fun j : Fin middle.card =>
+            outer.parent j = k)
+  ext i
+  simp
+
+/-- Every factored child belongs to the complete geometric containment fiber
+over the same parent. -/
+lemma factoringFiberIndices_subset_containedIndices
+    {δ ρ : ℝ} {fine : TubeFamily δ} {coarse : TubeFamily ρ}
+    (P : TubeCover fine coarse) (j : Fin coarse.card) :
+    P.toFactoring.fiberIndices j ⊆ fine.containedIndices coarse j := by
+  change
+    (Finset.univ.filter fun i : Fin fine.card => P.parent i = j) ⊆
+      fine.containedIndices coarse j
+  intro index hindex
+  have hparent :
+      P.parent index = j :=
+    (Finset.mem_filter.mp hindex).2
+  rw [TubeFamily.mem_containedIndices_iff]
+  have hnested := P.nested index
+  rwa [hparent] at hnested
+
+/-- Factoring-fiber cardinality is bounded by complete containment-fiber
+cardinality. -/
+lemma factoringFiberCount_le_containedCount
+    {δ ρ : ℝ} {fine : TubeFamily δ} {coarse : TubeFamily ρ}
+    (P : TubeCover fine coarse) (j : Fin coarse.card) :
+    P.toFactoring.fiberCount j ≤ fine.containedCount coarse j := by
+  change
+    ((Finset.univ.filter fun i : Fin fine.card =>
+      P.parent i = j).card : ENNReal) ≤
+      ((fine.containedIndices coarse j).card : ENNReal)
+  exact_mod_cast
+    Finset.card_le_card
+      (P.factoringFiberIndices_subset_containedIndices j)
+
+/--
+Every surjective parent map is crudely assigned-uniform once the comparison
+constant dominates the total fine-family cardinality.
+-/
+lemma factoringFibersAreCUniform_of_enncard_le
+    {δ ρ : ℝ} {fine : TubeFamily δ} {coarse : TubeFamily ρ}
+    (P : TubeCover fine coarse) {C : ENNReal}
+    (hC : 1 ≤ C) (hcard : fine.enncard ≤ C) :
+    P.toFactoring.FibersAreCUniform C :=
+  P.toFactoring.fibersAreCUniform_of_enncard_le hC hcard
+
+/-- Complete geometric containment fibers have comparable cardinalities. -/
 def IsCUniform {δ ρ : ℝ} {fine : TubeFamily δ} {coarse : TubeFamily ρ}
-    (P : TubeCover fine coarse) (C : ENNReal) : Prop :=
-  1 ≤ C ∧ ∀ j k, P.fiberCount j ≤ C * P.fiberCount k
+    (_P : TubeCover fine coarse) (C : ENNReal) : Prop :=
+  fine.FibersAreCUniform coarse C
+
+/--
+Every strict surjective cover is crudely full-fiber uniform once the constant
+dominates the total fine-family cardinality.
+-/
+lemma isCUniform_of_enncard_le
+    {δ ρ : ℝ} {fine : TubeFamily δ} {coarse : TubeFamily ρ}
+    (P : TubeCover fine coarse) {C : ENNReal}
+    (hC : 1 ≤ C) (hcard : fine.enncard ≤ C) :
+    P.IsCUniform C := by
+  classical
+  refine ⟨hC, ?_⟩
+  intro first second
+  have hFirstNat :
+      (fine.containedIndices coarse first).card ≤ fine.card := by
+    simpa using
+      (Finset.card_le_card
+        (Finset.subset_univ
+          (fine.containedIndices coarse first)))
+  have hFirst :
+      fine.containedCount coarse first ≤ fine.enncard := by
+    unfold TubeFamily.containedCount TubeFamily.enncard
+    exact_mod_cast hFirstNat
+  have hSecond :
+      (1 : ENNReal) ≤ fine.containedCount coarse second := by
+    rcases P.parent_surjective second with ⟨index, hindex⟩
+    have hmem :
+        index ∈ fine.containedIndices coarse second := by
+      rw [TubeFamily.mem_containedIndices_iff]
+      have hnested := P.nested index
+      rwa [hindex] at hnested
+    unfold TubeFamily.containedCount
+    exact_mod_cast (Finset.card_pos.mpr ⟨index, hmem⟩)
+  calc
+    fine.containedCount coarse first ≤ fine.enncard := hFirst
+    _ ≤ C := hcard
+    _ ≤ C * fine.containedCount coarse second := by
+      simpa using mul_le_mul_right hSecond C
 
 end TubeCover
 

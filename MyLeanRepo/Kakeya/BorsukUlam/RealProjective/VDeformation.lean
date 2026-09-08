@@ -15,7 +15,7 @@ Uses an explicit formula in Veronese coordinates.
 
 import MyLeanRepo.Kakeya.BorsukUlam.RealProjective.Cover
 import MyLeanRepo.Kakeya.BorsukUlam.RealProjective.MetricEmbedding
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.SingularHomology.EuclideanSpace.StdSphereHomology
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.SingularHomology.EuclideanSpace.StdSphereHomology
 import Mathlib.Tactic
 
 noncomputable section

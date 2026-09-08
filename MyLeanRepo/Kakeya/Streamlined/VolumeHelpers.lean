@@ -198,6 +198,138 @@ theorem volume_axisBox (a b c : ℝ) (ha : 0 < a) (hb : 0 < b) (hc : 0 < c) :
     exact h1
   exact h_prod
 
+/-- Volume of axis-box ∩ closed ball bounded by slab thickness in direction 2.
+
+The ball contributes at most length `2*r` in the third coordinate, while the
+first two coordinates are bounded by the box widths `w` and `h`. -/
+theorem volume_axisBox_inter_closedBall_slab (w h d r : ℝ)
+    (hw : 0 ≤ w) (hh : 0 ≤ h) (hd : 0 ≤ d) (hr : 0 ≤ r) (y : Point3) :
+    volume (axisBox w h d ∩ Metric.closedBall y r) ≤
+      ENNReal.ofReal (w * h * 2 * r) := by
+  let s : Set Point3 := axisBox w h d ∩ Metric.closedBall y r
+  let proj : Fin 3 → Point3 → ℝ := fun i z => z i
+  have h_abs_coord : ∀ (x : Point3) (i : Fin 3), |x i| ≤ ‖x‖ := by
+    intro x i
+    have h1 : (x i)^2 ≤ ‖x‖^2 := by
+      rw [EuclideanSpace.real_norm_sq_eq]
+      have h2 : (x i)^2 ≤ ∑ j : Fin 3, (x j)^2 :=
+        Finset.single_le_sum (fun j _ => sq_nonneg (x j)) (Finset.mem_univ i)
+      exact h2
+    have h3 : |x i|^2 = (x i)^2 := by rw [sq_abs]
+    nlinarith [abs_nonneg (x i), norm_nonneg x]
+  have h_proj0 : (proj 0 '' s) ⊆ Set.Icc (-w / 2) (w / 2) := by
+    intro x hx
+    rcases hx with ⟨z, hz, rfl⟩
+    have h4 : |z 0| ≤ w / 2 := hz.1.1
+    exact ⟨by linarith [(abs_le.mp h4).1], by linarith [(abs_le.mp h4).2]⟩
+  have h_proj1 : (proj 1 '' s) ⊆ Set.Icc (-h / 2) (h / 2) := by
+    intro x hx
+    rcases hx with ⟨z, hz, rfl⟩
+    have h4 : |z 1| ≤ h / 2 := hz.1.2.1
+    exact ⟨by linarith [(abs_le.mp h4).1], by linarith [(abs_le.mp h4).2]⟩
+  have h_proj2 : (proj 2 '' s) ⊆ Set.Icc (y 2 - r) (y 2 + r) := by
+    intro x hx
+    rcases hx with ⟨z, hz, rfl⟩
+    have h7 : dist z y ≤ r := hz.2
+    have h8 : |z 2 - y 2| ≤ r := by
+      have h9 : |z 2 - y 2| ≤ ‖z - y‖ := h_abs_coord (z - y) 2
+      have h10 : ‖z - y‖ = dist z y := by rfl
+      rw [h10] at h9
+      exact h9.trans h7
+    exact ⟨by linarith [(abs_le.mp h8).1], by linarith [(abs_le.mp h8).2]⟩
+  have h_ediam0 : ediam (proj 0 '' s) ≤ ENNReal.ofReal w := by
+    have h3 : ediam (Set.Icc (-w / 2) (w / 2)) = ENNReal.ofReal w := by
+      rw [Real.ediam_Icc] <;> ring_nf
+    exact (ediam_mono h_proj0).trans h3.le
+  have h_ediam1 : ediam (proj 1 '' s) ≤ ENNReal.ofReal h := by
+    have h3 : ediam (Set.Icc (-h / 2) (h / 2)) = ENNReal.ofReal h := by
+      rw [Real.ediam_Icc] <;> ring_nf
+    exact (ediam_mono h_proj1).trans h3.le
+  have h_ediam2 : ediam (proj 2 '' s) ≤ ENNReal.ofReal (2 * r) := by
+    have h3 : ediam (Set.Icc (y 2 - r) (y 2 + r)) =
+        ENNReal.ofReal (2 * r) := by
+      rw [Real.ediam_Icc] <;> ring_nf
+    exact (ediam_mono h_proj2).trans h3.le
+  let e_equiv : Point3 ≃L[ℝ] (Fin 3 → ℝ) := EuclideanSpace.equiv (Fin 3) ℝ
+  let s' : Set (Fin 3 → ℝ) := e_equiv '' s
+  have h_mp : MeasurePreserving e_equiv volume volume := by
+    have h_eq : (e_equiv : Point3 → (Fin 3 → ℝ)) =
+        (@WithLp.ofLp 2 (Fin 3 → ℝ)) := by
+      funext x
+      simp [e_equiv, EuclideanSpace.equiv] <;> rfl
+    rw [h_eq]
+    exact PiLp.volume_preserving_ofLp (Fin 3)
+  have h_meas_s : MeasurableSet s := by
+    have h_box_closed : IsClosed (axisBox w h d) := by
+      simp only [axisBox, Set.setOf_and]
+      have h0 : IsClosed {x : Point3 | |x 0| ≤ w / 2} :=
+        isClosed_le (by fun_prop) continuous_const
+      have h1 : IsClosed {x : Point3 | |x 1| ≤ h / 2} :=
+        isClosed_le (by fun_prop) continuous_const
+      have h2 : IsClosed {x : Point3 | |x 2| ≤ d / 2} :=
+        isClosed_le (by fun_prop) continuous_const
+      exact h0.inter (h1.inter h2)
+    have h1 : MeasurableSet (axisBox w h d) := h_box_closed.measurableSet
+    have h2 : MeasurableSet (Metric.closedBall y r) :=
+      isClosed_closedBall.measurableSet
+    exact h1.inter h2
+  have h_vol : volume s = volume s' := by
+    have h_preimg : e_equiv ⁻¹' s' = s := e_equiv.injective.preimage_image s
+    have h_meas' : MeasurableSet s' :=
+      e_equiv.toHomeomorph.measurableEmbedding.measurableSet_image.mpr h_meas_s
+    have h : volume (e_equiv ⁻¹' s') = volume s' :=
+      h_mp.measure_preimage h_meas'.nullMeasurableSet
+    rw [h_preimg] at h
+    exact h
+  have h_diam_transfer : ∀ i : Fin 3,
+      ediam (proj i '' s) =
+        ediam ((fun p : Fin 3 → ℝ => p i) '' s') := by
+    intro i
+    have h1 : (proj i '' s) =
+        (fun p : Fin 3 → ℝ => p i) '' s' := by
+      ext x
+      simp only [Set.mem_image, proj, s']
+      constructor
+      · rintro ⟨z, hz, rfl⟩
+        refine ⟨e_equiv z, ⟨z, hz, rfl⟩, ?_⟩
+        simp [e_equiv, EuclideanSpace.equiv]
+      · rintro ⟨_, ⟨z, hz, rfl⟩, rfl⟩
+        exact ⟨z, hz, by simp [e_equiv, EuclideanSpace.equiv]⟩
+    rw [h1]
+  have h_main' :
+      volume s' ≤
+        ∏ i : Fin 3, ediam ((fun p : Fin 3 → ℝ => p i) '' s') :=
+    Real.volume_pi_le_prod_diam s'
+  have h_main : volume s ≤ ∏ i : Fin 3, ediam (proj i '' s) := by
+    rw [h_vol]
+    rw [Finset.prod_congr rfl (fun i _ => h_diam_transfer i)]
+    exact h_main'
+  have h_final :
+      (∏ i : Fin 3, ediam (proj i '' s)) ≤
+        ENNReal.ofReal (w * h * 2 * r) := by
+    calc
+      (∏ i : Fin 3, ediam (proj i '' s))
+          = ediam (proj 0 '' s) * ediam (proj 1 '' s) *
+              ediam (proj 2 '' s) := by
+            simp [Fin.prod_univ_succ, mul_assoc] <;> ring
+      _ ≤ ENNReal.ofReal w * ENNReal.ofReal h *
+          ENNReal.ofReal (2 * r) := by
+            gcongr
+      _ = ENNReal.ofReal (w * h * 2 * r) := by
+        have h1 :
+            ENNReal.ofReal w * ENNReal.ofReal h =
+              ENNReal.ofReal (w * h) := by
+          rw [← ENNReal.ofReal_mul (by positivity)]
+        rw [h1]
+        have h2 :
+            ENNReal.ofReal (w * h) * ENNReal.ofReal (2 * r) =
+              ENNReal.ofReal ((w * h) * (2 * r)) := by
+          rw [← ENNReal.ofReal_mul (by positivity)]
+        rw [h2]
+        have h3 : (w * h) * (2 * r) = w * h * 2 * r := by ring
+        rw [h3]
+  exact h_main.trans h_final
+
 /-! ### 2. Volume bounds from HasDimensionsInFrame -/
 
 /-- An affine isometry equivalence preserves Lebesgue volume of a measurable set. -/

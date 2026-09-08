@@ -18,7 +18,7 @@ import Mathlib.Data.ZMod.Basic
 noncomputable section
 
 open AlgebraicTopology CategoryTheory Limits HomologicalComplex Simplicial Preadditive
-open Vendored.AlgebraicTopology.Degree
+open SeedMathlib.AlgebraicTopology.Degree
 open BorsukUlamBackup
 
 namespace BorsukUlam.H0BaseCase

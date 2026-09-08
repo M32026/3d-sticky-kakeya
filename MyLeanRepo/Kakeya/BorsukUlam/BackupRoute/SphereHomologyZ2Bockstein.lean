@@ -19,8 +19,8 @@ and known integer homology of spheres.
 -/
 
 import MyLeanRepo.Kakeya.BorsukUlam.BackupRoute.BocksteinDirect
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.SingularHomology.EuclideanSpace.StdSphereHomology
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.SingularHomology.EuclideanSpace.TopSphereHomology
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.SingularHomology.EuclideanSpace.StdSphereHomology
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.SingularHomology.EuclideanSpace.TopSphereHomology
 import Mathlib.AlgebraicTopology.SingularHomology.HomologyZero
 import Mathlib.Algebra.Homology.HomologySequence
 import Mathlib.Algebra.Homology.ShortComplex.ShortExact
@@ -29,7 +29,7 @@ noncomputable section
 
 open AlgebraicTopology CategoryTheory Limits HomologicalComplex Simplicial Preadditive
 open AlgebraicTopology.StdSphereHomology
-open Vendored.AlgebraicTopology.SingularHomology.EuclideanSpace
+open SeedMathlib.AlgebraicTopology.SingularHomology.EuclideanSpace
 
 namespace BorsukUlam.BackupRoute
 

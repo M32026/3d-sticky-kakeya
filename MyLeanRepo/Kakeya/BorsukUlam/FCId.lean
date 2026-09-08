@@ -35,7 +35,7 @@ import MyLeanRepo.Kakeya.BorsukUlam.HDTopIso
 noncomputable section
 
 open AlgebraicTopology CategoryTheory Limits HomologicalComplex
-open Vendored.AlgebraicTopology.Degree
+open SeedMathlib.AlgebraicTopology.Degree
 open BorsukUlamBackup
 
 variable {n : ℕ}

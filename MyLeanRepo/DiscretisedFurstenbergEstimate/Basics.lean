@@ -323,7 +323,7 @@ probability measure `μ` supported on `P` such that
 This is the discretized Frostman lemma. The proof uses a maximal `δ`-separated
 subset and the doubling property of covering numbers in `ℝ²`.
 
-The continuous Frostman lemma from the upstream mathlib extension (`frostman_forward`) applies
+The continuous Frostman lemma from SeedMathlib (`frostman_forward`) applies
 when the set has positive Hausdorff measure; here we use the covering-number
 characterization directly. -/
 theorem IsDeltaSSet.frostmanMeasure {δ s C : ℝ} {P : Set EuclideanPlane}

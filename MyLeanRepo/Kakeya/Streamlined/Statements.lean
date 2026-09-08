@@ -1,11 +1,12 @@
-import MyLeanRepo.Kakeya.Streamlined.Estimates
+import MyLeanRepo.Kakeya.Streamlined.DilatedStickyInput
+import MyLeanRepo.Kakeya.Streamlined.RandomTranslation.DilatedPointwiseFullFiberUniformShading
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 /-!
 # Paper-level target statements for the streamlined proof
 
 This file contains rigorous propositions and data structures only.  The
-individual leaf targets live in
+individual SeedProver targets live in
 `MyLeanRepo/Kakeya/Streamlined/Targets/`; each such file contains exactly one
 theorem and one proof placeholder.
 -/
@@ -100,9 +101,23 @@ end FramedSlab
 def planeAngle (u v : Point3) : ℝ :=
   Real.arccos |inner ℝ u v|
 
+/--
+Absolute comparability factor for the test slabs used in the plank
+nonconcentration condition.
+
+The paper tests containment in a slab of dimensions comparable to
+`theta × 1 × 1`.  This factor must be strictly larger than the comparability
+factor of the input planks so aligned planks that meet one spatial band fit
+inside a common test slab.
+-/
+def plankTestSlabFactor (A : ℝ) : ℝ :=
+  10 * A + 2
+
 /-- Planks contained in and aligned with a test slab. -/
 def planksInSlab {a b A : ℝ} (P : PlankFamily a b A)
-    (theta : ℝ) (S : FramedSlab theta A) : Finset (Fin P.family.card) := by
+    (theta : ℝ)
+    (S : FramedSlab theta (plankTestSlabFactor A)) :
+    Finset (Fin P.family.card) := by
   classical
   exact Finset.univ.filter fun i =>
     (P.family.body i).carrier ⊆ S.body.carrier ∧
@@ -112,7 +127,7 @@ def planksInSlab {a b A : ℝ} (P : PlankFamily a b A)
 def PlankSlabNonconcentration {a b A : ℝ} (P : PlankFamily a b A)
     (eta gamma : ℝ) : Prop :=
   ∀ theta : ℝ, a / b ≤ theta → theta ≤ 1 →
-    ∀ S : FramedSlab theta A,
+    ∀ S : FramedSlab theta (plankTestSlabFactor A),
       ((planksInSlab P theta S).card : ENNReal) ≤
         Kakeya.realRpowENN a (-eta) *
           Kakeya.realRpowENN theta gamma * P.family.enncard
@@ -173,6 +188,76 @@ def HasLocalPlankFactoring {δ rho a b A : ℝ}
     {fine : TubeFamily δ} {coarse : TubeFamily rho}
     (P : TubeCover fine coarse) (C : ENNReal) : Prop :=
   ∀ j, HasFiberPlankFactoring (a := a) (b := b) (A := A) P j C
+
+/--
+All fine tubes geometrically contained in one coarse tube.
+
+This is the paper family `T[T_rho]`.  It is independent of the auxiliary
+surjective parent map in a `TubeCover`.
+-/
+def fullContainmentFiberIndices {δ rho : ℝ}
+    (fine : TubeFamily δ) (coarse : TubeFamily rho)
+    (j : Fin coarse.card) : Finset (Fin fine.card) :=
+  fine.toBodyFamily.containedIndices (coarse.tube j).carrier
+
+/--
+The indexed body family formed by one full geometric containment fiber.
+
+The order embedding of the finite index set retains indexed multiplicity even
+when distinct fine tubes have equal carriers.
+-/
+def fullContainmentFiberFamily {δ rho : ℝ}
+    (fine : TubeFamily δ) (coarse : TubeFamily rho)
+    (j : Fin coarse.card) : BodyFamily :=
+  let I := fullContainmentFiberIndices fine coarse j
+  { card := I.card
+    body := fun i => fine.toBodyFamily.body (I.orderEmbOfFin rfl i) }
+
+/--
+A plank family faithfully factors the paper full-containment fiber over one
+coarse tube.
+
+Besides Katz--Tao and fiberwise Frostman control, the factoring records the
+density comparability required by the paper definition of “factors”.  Every
+factoring plank lies inside the distinguished coarse tube.
+-/
+def HasFullContainmentFiberPlankFactoring {δ rho a b A : ℝ}
+    (fine : TubeFamily δ) (coarse : TubeFamily rho)
+    (j : Fin coarse.card) (C : ENNReal) : Prop :=
+  let fiber := fullContainmentFiberFamily fine coarse j
+  ∃ planks : PlankFamily a b A,
+    ∃ Q : Factoring fiber planks.family,
+      (∀ p, (planks.family.body p).carrier ⊆
+        (coarse.tube j).carrier) ∧
+      planks.family.IsCKatzTao C ∧
+      Q.FibersAreCFrostman C ∧
+      Q.FibersHaveDensity fiber.deltaMax C
+
+/--
+Every paper full-containment fiber at one scale admits a faithful plank
+factoring with the same dimensions and error.
+-/
+def HasFullContainmentLocalPlankFactoring {δ rho a b A : ℝ}
+    (fine : TubeFamily δ) (coarse : TubeFamily rho)
+    (C : ENNReal) : Prop :=
+  ∀ j, HasFullContainmentFiberPlankFactoring
+    (a := a) (b := b) (A := A) fine coarse j C
+
+/--
+A faithful global plank factoring in the sense of the paper definition.
+
+The older `HasGlobalPlankFactoring` predicate is retained for internal tools
+that need only a chosen partition and Frostman control.  The paper proposition
+also requires every factoring fiber density to be comparable to the maximal
+density of the source family.
+-/
+def HasFaithfulGlobalPlankFactoring {δ a b A : ℝ}
+    (F : TubeFamily δ) (C : ENNReal) : Prop :=
+  ∃ P : PlankFamily a b A,
+    ∃ Q : Factoring F.toBodyFamily P.family,
+      P.family.IsCKatzTao C ∧
+      Q.FibersAreCFrostman C ∧
+      Q.FibersHaveDensity F.toBodyFamily.deltaMax C
 
 /-- Section 4: maximal-density factoring. -/
 def MaximalDensityFactoringStatement : Prop :=
@@ -437,8 +522,15 @@ def PlankFrostmanStatement : Prop :=
                       (Kakeya.realRpowENN b 2 * P.family.enncard)
                       (1 - beta / 2))
 
-/-- Section 6: the two flat-prism factoring alternatives. -/
-def FlatPrismFactoringStatement : Prop :=
+/--
+Legacy Section 6 interface with only family uniformity and strict undilated
+coarse-parent factoring.
+
+This is not the literal paper Proposition 6.6, whose `(F, Y)` uniformity is
+Definition 2.2 and whose repaired geometric interface uses fixed-dilation full
+fibers.
+-/
+def LegacyStrictFamilyUniformFlatPrismFactoringStatement : Prop :=
   ∀ beta : ℝ, KatzTaoEstimate beta → FrostmanEstimate beta →
     ∀ A : ℝ, 1 ≤ A →
     ∀ epsilon : ℝ, 0 < epsilon →
@@ -453,8 +545,9 @@ def FlatPrismFactoringStatement : Prop :=
                 U.uniformity ≤ Kakeya.realRpowENN delta (-eta) →
               ∀ a b : ℝ, 0 < a → a ≤ b → b ≤ 1 →
                 ((∃ rho : AdmissibleScale delta,
-                    HasLocalPlankFactoring
-                      (a := a) (b := b) (A := A) (U.cover rho)
+                    HasFullContainmentLocalPlankFactoring
+                      (a := a) (b := b) (A := A)
+                      F (U.coarse rho)
                       (Kakeya.realRpowENN delta (-eta))) →
                     Y.HasAverageMultiplicityAtMost
                       (Kakeya.realRpowENN delta (-epsilon - 2 * beta) *
@@ -466,7 +559,7 @@ def FlatPrismFactoringStatement : Prop :=
                           (Kakeya.realRpowENN delta 2 * F.enncard)
                           (1 - beta / 2))) ∧
                   ((∃ rho : AdmissibleScale delta,
-                    HasGlobalPlankFactoring
+                    HasFaithfulGlobalPlankFactoring
                       (a := a) (b := b) (A := A) (U.coarse rho)
                       (Kakeya.realRpowENN delta (-eta))) →
                     Y.HasAverageMultiplicityAtMost
@@ -475,17 +568,77 @@ def FlatPrismFactoringStatement : Prop :=
                         Kakeya.realRpowENN (a / b) beta *
                         ENNReal.rpow F.enncard beta))
 
-/-- Section 7(B): derive the every-scale Katz--Tao estimate from sticky Kakeya. -/
-def KatzTaoEveryScaleFromStickyStatement : Prop :=
-  StickyKakeyaHypothesis → KatzTaoEveryScaleEstimate
+/--
+Internal stronger family-uniform Katz--Tao-at-every-scale consequence at one
+explicit cover dilation.
 
-/-- Cardinality condition defining the very-not-sticky regime in Section 9. -/
-def IsVeryNotSticky {δ : ℝ} {F : TubeFamily δ}
-    (U : UniformTubeStructure F) (epsilonScale zeta : ℝ) : Prop :=
+This is the theorem actually proved by the current Section 7(B) hard/easy
+construction. It exposes raw all-real quantitative data, accepts an arbitrary
+dense shading, and is not the literal paper interface.
+-/
+def FamilyUniformFullFiberKatzTaoEveryScaleEstimate (A : ℝ) : Prop :=
+  ∀ epsilon : ℝ, 0 < epsilon →
+    ∃ eta delta₀ : ℝ, 0 < eta ∧ 0 < delta₀ ∧ delta₀ ≤ 1 ∧
+      ∀ delta : ℝ, 0 < delta → delta ≤ delta₀ →
+        ∀ F : TubeFamily delta,
+          F.Nonempty →
+          F.IsInUnitBall →
+          F.IsEssentiallyDistinct →
+          ∀ U : DilatedUniformTubeStructure (A := A) F,
+          U.uniformity ≤ Kakeya.realRpowENN delta (-eta) →
+          U.IsKatzTaoAtEveryScale
+            (Kakeya.realRpowENN delta (-eta)) →
+          ∀ Y : TubeShading F,
+            Y.IsLambdaDense (Kakeya.realRpowENN delta eta) →
+            Y.HasAverageMultiplicityAtMost
+              (Kakeya.realRpowENN delta (-epsilon))
+
+/--
+The paper-facing Definition 2.2 Katz--Tao-at-every-scale consequence.
+
+The input structure couples the family and shading and includes the
+pointwise incident-family branching condition from Definition 2.2. The
+current stronger proof may ignore that additional field after projecting its
+ambient Definition 2.1 structure.
+-/
+def FullFiberKatzTaoEveryScaleEstimate (A : ℝ) : Prop :=
+  ∀ epsilon : ℝ, 0 < epsilon →
+    ∃ eta delta₀ : ℝ, 0 < eta ∧ 0 < delta₀ ∧ delta₀ ≤ 1 ∧
+      ∀ delta : ℝ, 0 < delta → delta ≤ delta₀ →
+        ∀ F : TubeFamily delta,
+          F.Nonempty →
+          F.IsInUnitBall →
+          F.IsEssentiallyDistinct →
+          ∀ Y : TubeShading F,
+            Y.IsLambdaDense (Kakeya.realRpowENN delta eta) →
+          ∀ U :
+              ApproxDilatedPointwiseFullFiberUniformTubeShading
+                (A := A) eta F Y,
+            U.raw.ambientStructure.IsKatzTaoAtEveryScale
+                (Kakeya.realRpowENN delta (-eta)) →
+            Y.HasAverageMultiplicityAtMost
+              (Kakeya.realRpowENN delta (-epsilon))
+
+/-- Section 7(B): derive the paper-facing every-scale estimate from sticky Kakeya. -/
+def KatzTaoEveryScaleFromStickyStatement : Prop :=
+  GWZStickyVolumeSocket →
+    FullFiberKatzTaoEveryScaleEstimate
+      theoremSevenThreeCoverDilation
+
+/-- Internal raw cardinality condition for the very-not-sticky regime. -/
+def RawIsVeryNotSticky {δ A : ℝ} {F : TubeFamily δ}
+    (U : DilatedUniformTubeStructure (A := A) F)
+    (epsilonScale zeta : ℝ) : Prop :=
   ∀ rho : AdmissibleScale δ,
     Kakeya.realRpowENN δ (1 - epsilonScale) ≤ ENNReal.ofReal rho.1 →
     ENNReal.ofReal rho.1 ≤ Kakeya.realRpowENN δ epsilonScale →
       Kakeya.realRpowENN rho.1 (-2 - zeta) ≤ (U.coarse rho).enncard
+
+/-- Paper-facing very-not-sticky condition with an explicit `≈` certificate. -/
+def IsVeryNotSticky {δ A eta : ℝ} {F : TubeFamily δ}
+    (U : ApproxDilatedUniformTubeStructure (A := A) eta F)
+    (epsilonScale zeta : ℝ) : Prop :=
+  RawIsVeryNotSticky U.raw epsilonScale zeta
 
 /-- Section 9: the very-not-sticky case used inside Main Lemma 2. -/
 def VeryNotStickyStatement : Prop :=
@@ -502,7 +655,8 @@ def VeryNotStickyStatement : Prop :=
                   F.IsEssentiallyDistinct →
                   F.toBodyFamily.IsCKatzTao
                     (Kakeya.realRpowENN delta (-eta)) →
-                  ∀ U : UniformTubeStructure F,
+                  ∀ U : ApproxDilatedUniformTubeStructure
+                      (A := theoremSevenThreeCoverDilation) eta F,
                     IsVeryNotSticky U epsilonScale zeta →
                     ∀ Y : TubeShading F,
                       Y.IsLambdaDense
@@ -513,7 +667,7 @@ def VeryNotStickyStatement : Prop :=
 
 /-- Section 8: Main Lemma 1. -/
 def MainLemma1Statement : Prop :=
-  StickyKakeyaHypothesis →
+  GWZStickyVolumeSocket →
     ∀ beta : ℝ, 0 ≤ beta → beta ≤ 1 →
       KatzTaoEstimate beta → FrostmanEstimate beta
 
@@ -522,7 +676,7 @@ Section 9: Main Lemma 2, including a positive exponent-drop function that is
 monotone on `[0,1]`, as required by the final finite iteration.
 -/
 def MainLemma2Statement : Prop :=
-  StickyKakeyaHypothesis →
+  GWZStickyVolumeSocket →
     VeryNotStickyStatement →
     ∃ nu : ℝ → ℝ,
       MonotoneOn nu (Set.Icc 0 1) ∧
@@ -536,7 +690,7 @@ Final parameter iteration.  The two Main Lemmas are ordinary proof arguments;
 there is no axiom and no imported theorem containing a hidden placeholder.
 -/
 def StickyImpliesGeneralStatement : Prop :=
-  StickyKakeyaHypothesis →
+  GWZStickyVolumeSocket →
     VeryNotStickyStatement →
     MainLemma1Statement →
     MainLemma2Statement →

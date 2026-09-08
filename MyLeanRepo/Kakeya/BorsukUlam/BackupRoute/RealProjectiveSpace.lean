@@ -15,7 +15,7 @@ establishes the 2-sheeted covering map.
 
 import Mathlib.Tactic
 import Mathlib.Topology.Covering.Quotient
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.SingularHomology.EuclideanSpace.StdSphereHomology
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.SingularHomology.EuclideanSpace.StdSphereHomology
 
 open AlgebraicTopology CategoryTheory Limits HomologicalComplex
 open AlgebraicTopology.StdSphereHomology

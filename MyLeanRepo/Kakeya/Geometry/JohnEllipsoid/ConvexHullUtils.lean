@@ -15,7 +15,7 @@ needed for the Löwner–John ellipsoid theorem.
   to one lies in any convex set containing the points.
 -/
 
-import MyLeanRepo.Kakeya.Geometry.JohnEllipsoid.MinkowskiCaratheodory
+import MyLeanRepo.Kakeya.Geometry.JohnEllipsoid.SeedMathlib.Analysis.Convex.MinkowskiCaratheodory
 import Mathlib.Analysis.Convex.StdSimplex
 
 noncomputable section
@@ -26,7 +26,7 @@ namespace JohnEllipsoid.ConvexHullUtils
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
 
-open JohnEllipsoid.MinkowskiCaratheodory.CaratheodoryFinite
+open SeedMathlib.Analysis.Convex.MinkowskiCaratheodory.CaratheodoryFinite
 
 /-- **Carathéodory's theorem** (explicit weights form): if `x ∈ convexHull ℝ S`,
 there exists a finite subset `t ⊆ S` of cardinality at most `finrank ℝ E + 1`

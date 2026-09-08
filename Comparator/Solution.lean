@@ -1,9 +1,18 @@
-import MyLeanRepo.Kakeya.Assouad.PureWZ2.Theorem5_2Unconditional
+import Comparator.SolutionStatements
+import Kakeya.DimensionThree.Final
 
-namespace Comparator
+open MeasureTheory
 
-theorem pure_wz2_theorem5_2_unconditional :
-    Kakeya.Assouad.PureWZ2Theorem5_2Statement :=
-  Kakeya.Assouad.pure_wz2_theorem5_2_unconditional
+local instance : Fintype (Fin 3) := Fin.fintype 3
 
-end Comparator
+/-- **Wang--Zahl's three-dimensional Kakeya theorem.** Every Kakeya set in
+three-dimensional Euclidean space has full Hausdorff dimension. -/
+theorem wang_zahl_kakeya_dimH {K : Set Space} (hK : IsKakeya K) :
+    dimH K = 3 := by
+  apply KakeyaDimensionThree K
+  refine ⟨hK.1, ?_⟩
+  intro v hv
+  obtain ⟨x, hx⟩ := hK.2 v hv
+  refine ⟨x, ?_⟩
+  rintro y ⟨t, ht, rfl⟩
+  simpa [AffineMap.lineMap_apply_module', add_comm] using hx t ht

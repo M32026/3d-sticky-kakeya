@@ -21,7 +21,7 @@ import Mathlib.Algebra.Homology.HomologySequence
 noncomputable section
 
 open AlgebraicTopology CategoryTheory Limits HomologicalComplex Simplicial Preadditive
-open Vendored.AlgebraicTopology.Degree
+open SeedMathlib.AlgebraicTopology.Degree
 open BorsukUlamBackup
 open BorsukUlam.QuotientSES
 open BorsukUlam.QuotientKernel

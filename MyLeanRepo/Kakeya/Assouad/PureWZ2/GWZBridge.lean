@@ -85,6 +85,42 @@ structure PureWZ2GWZFullFiberStructure
         (PureWZ2GWZScaleData
           (A := A) source rho C)
 
+namespace PureWZ2GWZFullFiberStructure
+
+/-- A full-fiber structure remains valid after increasing its common
+uniformity/Frostman coefficient to another finite coefficient. -/
+theorem mono
+    {delta A : ℝ}
+    {source : Kakeya.Streamlined.TubeFamily delta}
+    {C C' : ENNReal}
+    (data : PureWZ2GWZFullFiberStructure (A := A) source C)
+    (hCC' : C ≤ C') (hC'Top : C' ≠ ⊤) :
+    PureWZ2GWZFullFiberStructure (A := A) source C' := by
+  refine ⟨⟨data.finite_constant.1.trans hCC', hC'Top⟩, ?_⟩
+  intro rho
+  rcases data.scale rho with ⟨scale⟩
+  refine ⟨{
+    coarse := scale.coarse
+    coarse_distinct := scale.coarse_distinct
+    fullFiberIndices := scale.fullFiberIndices
+    fullFiberIndices_eq := scale.fullFiberIndices_eq
+    full_fiber_nonempty := scale.full_fiber_nonempty
+    full_fibers_cover := scale.full_fibers_cover
+    full_fiber_uniform := ?_
+    full_fiber_frostman := ?_
+  }⟩
+  · intro first second
+    exact (scale.full_fiber_uniform first second).trans (by gcongr)
+  · intro parent
+    dsimp only
+    intro convexSet hConvex hSubset
+    have h := scale.full_fiber_frostman parent
+    dsimp only at h
+    exact (h convexSet hConvex hSubset).trans
+      (by gcongr)
+
+end PureWZ2GWZFullFiberStructure
+
 /-- The fixed-support volume theorem consumed by one GWZ assembly. -/
 def PureWZ2FixedSupportDilatedStickyContract
     (A R : ℝ) : Prop :=

@@ -15,15 +15,15 @@ hence deg(h) = 0. Contradiction.
 
 import MyLeanRepo.Kakeya.BorsukUlam.BaseCases
 import MyLeanRepo.Kakeya.BorsukUlam.OddDegreeTheorem
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.Degree.Homology
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.Topology.Homotopy.HomotopyGroupSphereSubsingletonOfLt.MapMissesPointNullHomotopic
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.Degree.Homology
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.Topology.Homotopy.HomotopyGroupSphereSubsingletonOfLt.MapMissesPointNullHomotopic
 import Mathlib.Analysis.Convex.Contractible
 
 open scoped unitInterval Topology.Homotopy TopCat
 
 namespace BorsukUlam.DegreeProof
 
-open Vendored.AlgebraicTopology.Degree
+open SeedMathlib.AlgebraicTopology.Degree
 
 /-!
 ## Step 1: Equatorial embedding is nullhomotopic (general n)

@@ -139,6 +139,34 @@ lemma transportCover_frostman
 -- 5. Uniform structure transport
 -- ============================================================================
 
+/-- Transport preserves uniformity of the assigned parent-map fibers. -/
+lemma transportCover_assigned_fiberCount
+    (e : Point3 ≃ₗᵢ[ℝ] Point3)
+    {δ ρ : ℝ} {F : Streamlined.TubeFamily δ}
+    {G : Streamlined.TubeFamily ρ}
+    (P : Streamlined.TubeCover F G)
+    (j : Fin G.card) :
+    (transportCover e P).fiberCount j = P.fiberCount j := by
+  rfl
+
+/-- Transport preserves uniformity of the assigned parent-map fibers. -/
+lemma transportCover_assigned_uniform
+    (e : Point3 ≃ₗᵢ[ℝ] Point3)
+    {δ ρ : ℝ} {F : Streamlined.TubeFamily δ}
+    {G : Streamlined.TubeFamily ρ}
+    {P : Streamlined.TubeCover F G} {C : ENNReal}
+    (h : P.toFactoring.FibersAreCUniform C) :
+    (transportCover e P).toFactoring.FibersAreCUniform C := by
+  refine ⟨h.1, ?_⟩
+  intro j k
+  rw [TubeCover.toFactoring_fiberCount,
+    TubeCover.toFactoring_fiberCount,
+    transportCover_assigned_fiberCount,
+    transportCover_assigned_fiberCount]
+  have h2 := h.2 j k
+  rwa [TubeCover.toFactoring_fiberCount,
+    TubeCover.toFactoring_fiberCount] at h2
+
 def transportUniform (e : Point3 ≃ₗᵢ[ℝ] Point3)
     (hvol : ∀ s, volume (e '' s) = volume s)
     {δ : ℝ} {F : Streamlined.TubeFamily δ}
@@ -149,21 +177,8 @@ def transportUniform (e : Point3 ≃ₗᵢ[ℝ] Point3)
   uniformity := U.uniformity
   one_le_uniformity := U.one_le_uniformity
   uniformity_ne_top := U.uniformity_ne_top
-  uniform rho := by
-    have h := U.uniform rho
-    refine' ⟨h.1, _⟩
-    intro j k
-    have h2 := h.2 j k
-    have h3 : (transportCover e (U.cover rho)).fiberCount j =
-        (U.cover rho).fiberCount j := by
-      simp [TubeCover.fiberCount, transportCover]
-      <;> congr <;> rfl
-    have h4 : (transportCover e (U.cover rho)).fiberCount k =
-        (U.cover rho).fiberCount k := by
-      simp [TubeCover.fiberCount, transportCover]
-      <;> congr <;> rfl
-    rw [h3, h4]
-    exact h2
+  uniform rho :=
+    transportCover_assigned_uniform e (U.uniform rho)
   coarse_distinct rho i j hne := by
     have h := U.coarse_distinct rho i j hne
     simp only [Kakeya.DeltaTube.EssentiallyDistinct] at h ⊢

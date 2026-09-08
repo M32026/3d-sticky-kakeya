@@ -4,7 +4,7 @@ import MyLeanRepo.Kakeya.Cinematic.Geometry
 # Frozen statements for the PYZ cinematic proof
 
 This module contains propositions only. It has no proof placeholders and does
-not import any target theorem. Leaf targets import this file and
+not import any target theorem. SeedProver leaf targets import this file and
 receive earlier mathematical results as ordinary hypotheses, so proof issues
 can run independently.
 -/

@@ -2,7 +2,7 @@
   "challenge_module": "Comparator.Challenge",
   "solution_module": "Comparator.Solution",
   "theorem_names": [
-    "Comparator.pure_wz2_theorem5_2_unconditional"
+    "wang_zahl_kakeya_dimH"
   ],
   "permitted_axioms": [
     "propext",

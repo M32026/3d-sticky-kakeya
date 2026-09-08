@@ -7,8 +7,8 @@ the map p = 1 + a_# on singular chains satisfies im(p) = ker(p).
 It then defines the image subcomplex D_* and proves the short exact sequence
 0 → D_* → C_*(S^n; Z/2) → D_* → 0.
 -/
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.Degree.Homology
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.SingularHomology.EuclideanSpace.StdSphereHomology
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.Degree.Homology
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.SingularHomology.EuclideanSpace.StdSphereHomology
 import Mathlib.Algebra.Category.ModuleCat.Products
 import Mathlib.Data.Finsupp.ToDFinsupp
 import Mathlib.AlgebraicTopology.SimplicialSet.Homology.Basic
@@ -24,7 +24,7 @@ noncomputable section
 namespace BorsukUlamBackup
 
 open Metric AlgebraicTopology CategoryTheory Limits HomologicalComplex Simplicial Preadditive
-open Vendored.AlgebraicTopology.Degree
+open SeedMathlib.AlgebraicTopology.Degree
 open Finsupp
 
 variable {n : ℕ}

@@ -1,9 +1,9 @@
 import Comparator.Statements
 
-namespace Comparator
+local instance : Fintype (Fin 3) := Fin.fintype 3
 
-theorem pure_wz2_theorem5_2_unconditional :
-    Kakeya.Assouad.PureWZ2Theorem5_2Statement := by
+/-- **Wang--Zahl's three-dimensional Kakeya theorem.** Every Kakeya set in
+three-dimensional Euclidean space has full Hausdorff dimension. -/
+theorem wang_zahl_kakeya_dimH {K : Set Space} (hK : IsKakeya K) :
+    dimH K = 3 := by
   sorry
-
-end Comparator

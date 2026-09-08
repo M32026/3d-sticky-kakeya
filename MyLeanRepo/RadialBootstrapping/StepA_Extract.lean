@@ -17,7 +17,7 @@ public import MyLeanRepo.RadialBootstrapping.DiscreteFrostmanIsDeltaSet
 @[expose] public section
 
 open MeasureTheory Metric Set
-open Vendored.MeasureTheory.FractalGeometry.FrostmanLemma
+open SeedMathlib.MeasureTheory.FractalGeometry.FrostmanLemma
 open scoped ENNReal
 
 noncomputable section

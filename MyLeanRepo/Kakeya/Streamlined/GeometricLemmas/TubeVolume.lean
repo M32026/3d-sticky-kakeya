@@ -1,5 +1,6 @@
 import MyLeanRepo.Kakeya.Streamlined.Geometry
 import MyLeanRepo.Kakeya.Streamlined.VolumeHelpers
+import MyLeanRepo.Kakeya.Streamlined.GeometricLemmas.CapsuleVolume
 import Mathlib.Analysis.InnerProductSpace.Projection.Reflection
 import Mathlib.Topology.MetricSpace.HausdorffDistance
 import Mathlib.Analysis.Convex.SpecificFunctions.Deriv
@@ -233,5 +234,29 @@ theorem tube_volume_ge_two_delta_sq (δ : ℝ) (hδ : 0 < δ) :
   have h : volume B ≤ volume (cthickening δ S) := measure_mono h_sub
   rw [h_vol_B] at h
   exact h
+
+/-! ### 3. Volume lower bound: πδ² (via capsule decomposition) -/
+
+/-- Any δ-tube has volume at least πδ².
+
+Follows from `capsule_volume_lower`, which gives the sharper bound
+`πδ² + (4/3)πδ³`, and `tube_volume_eq` to transfer from the canonical
+capsule to an arbitrary tube. -/
+theorem tube_volume_ge_pi_delta_sq {δ : ℝ} (hδ : 0 < δ) (T : DeltaTube δ) :
+    ENNReal.ofReal (Real.pi * δ ^ 2) ≤ T.volume := by
+  have h1 : T.volume = Kakeya.deltaTubeVolume δ :=
+    tube_volume_eq T
+      { base := 0
+        direction := EuclideanSpace.single (0 : Fin 3) (1 : ℝ)
+        direction_unit := by simp }
+  rw [h1]
+  have h2 := GeometricLemmas.capsule_volume_lower δ hδ
+  have h4 : Real.pi * δ ^ 2 ≤ Real.pi * δ ^ 2 + (4 / 3 : ℝ) * Real.pi * δ ^ 3 := by
+    have h5 : 0 ≤ (4 / 3 : ℝ) * Real.pi * δ ^ 3 := by positivity
+    linarith
+  have h6 : ENNReal.ofReal (Real.pi * δ ^ 2) ≤
+      ENNReal.ofReal (Real.pi * δ ^ 2 + (4 / 3 : ℝ) * Real.pi * δ ^ 3) :=
+    ENNReal.ofReal_le_ofReal h4
+  exact le_trans h6 h2
 
 end Kakeya.Streamlined

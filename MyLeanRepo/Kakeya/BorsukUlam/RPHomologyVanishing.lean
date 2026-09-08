@@ -24,8 +24,8 @@ import MyLeanRepo.Kakeya.BorsukUlam.RealProjective.Cover
 import MyLeanRepo.Kakeya.BorsukUlam.RealProjective.VDeformation
 import MyLeanRepo.Kakeya.BorsukUlam.SmallChainBockstein
 import MyLeanRepo.Kakeya.BorsukUlam.BackupRoute.SphereHomologyZ2VanishingAbove
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.SingularHomology.EuclideanSpace.PuncturedSpace
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.SingularHomology.HomologyOfPoint
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.SingularHomology.EuclideanSpace.PuncturedSpace
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.SingularHomology.HomologyOfPoint
 import Mathlib.Algebra.Homology.HomologySequence
 
 noncomputable section

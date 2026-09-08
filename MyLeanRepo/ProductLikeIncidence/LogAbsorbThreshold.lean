@@ -21,18 +21,18 @@ so that `C ≤ x^(α/2)`. Then:
 
 ## Dependency
 
-`Vendored.NumberTheory.Analytic.Sieve.LogPowerBounds`
+`SeedMathlib.NumberTheory.Analytic.Sieve.LogPowerBounds`
 for `general_log_pow_le_rpow`.
 -/
 
-public import MyLeanRepo.Vendored.NumberTheory.Analytic.Sieve.LogPowerBounds
+public import MyLeanRepo.SeedMathlib.NumberTheory.Analytic.Sieve.LogPowerBounds
 public import MyLeanRepo.OSWPrelude
 
 @[expose] public section
 
 noncomputable section
 
-open Vendored.NumberTheory.Analytic.Sieve
+open SeedMathlib.NumberTheory.Analytic.Sieve
 
 /-- For `C > 0` and `α > 0`, `C * (log(1/δ))^2 ≤ δ^(-α)` for sufficiently small `δ`. -/
 lemma log_pow_const_le_rpow {C α : ℝ} (hC : 0 < C) (hα : 0 < α) :

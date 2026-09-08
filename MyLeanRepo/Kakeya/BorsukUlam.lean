@@ -3,7 +3,7 @@ import MyLeanRepo.Kakeya.BorsukUlam.DegreeProof
 /-!
 # Borsuk--Ulam theorem
 
-Adapted from an upstream mathlib extension, commit `e9ffbee0d0cb6b99dfab40c218df014f44d026bf`.
+Adapted from SeedMathlib commit `e9ffbee0d0cb6b99dfab40c218df014f44d026bf`.
 -/
 
 namespace TopCat

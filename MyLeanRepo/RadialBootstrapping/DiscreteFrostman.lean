@@ -6,7 +6,7 @@ This module provides:
 2. Discrete Frostman lemma: from positive Hausdorff content, extract a separated
    set with packing/covering number lower bound
 
-Authors: Onyx (mathlib extension)
+Authors: Onyx (SeedMathlib extension)
 -/
 module
 
@@ -17,7 +17,7 @@ public import MyLeanRepo.OSWPrelude
 open MeasureTheory Metric Set Filter
 open scoped ENNReal NNReal
 
-namespace Vendored.MeasureTheory.FractalGeometry.FrostmanLemma
+namespace SeedMathlib.MeasureTheory.FractalGeometry.FrostmanLemma
 
 variable {n : ℕ} {s : ℝ}
 
@@ -69,4 +69,4 @@ lemma bounded_packingNumber_ne_top {n : ℕ} {A : Set (EuclideanSpace ℝ (Fin n
   intro h_contra
   rw [h_contra] at h6
   exact h_ext (top_le_iff.mp h6)
-end Vendored.MeasureTheory.FractalGeometry.FrostmanLemma
+end SeedMathlib.MeasureTheory.FractalGeometry.FrostmanLemma

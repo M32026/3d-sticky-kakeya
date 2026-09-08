@@ -17,7 +17,7 @@ noncomputable section
 namespace BorsukUlamBackup
 
 open AlgebraicTopology CategoryTheory Limits HomologicalComplex Simplicial
-open Vendored.AlgebraicTopology.Degree
+open SeedMathlib.AlgebraicTopology.Degree
 
 /-- The forgetful functor from Z/2-modules to abelian groups. -/
 abbrev forgetZ2 : ModuleCat Z2 ⥤ AddCommGrpCat :=

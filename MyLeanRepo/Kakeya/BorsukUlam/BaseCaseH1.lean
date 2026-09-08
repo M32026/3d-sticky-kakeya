@@ -24,7 +24,7 @@ import MyLeanRepo.Kakeya.BorsukUlam.TransferInstantiation
 import MyLeanRepo.Kakeya.BorsukUlam.BackupRoute.RealProjectiveSpace
 import MyLeanRepo.Kakeya.BorsukUlam.BackupRoute.CategoryBridge
 import MyLeanRepo.Kakeya.BorsukUlam.BackupRoute.SphereHomologyZ2Bockstein
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.Degree.SphereOneCircle
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.Degree.SphereOneCircle
 import Mathlib.Algebra.Homology.ShortComplex.ShortExact
 import Mathlib.Algebra.Homology.HomologySequence
 import Mathlib.Analysis.SpecialFunctions.Complex.Circle
@@ -32,7 +32,7 @@ import Mathlib.Analysis.SpecialFunctions.Complex.Circle
 noncomputable section
 
 open AlgebraicTopology CategoryTheory Limits HomologicalComplex Simplicial Preadditive
-open Vendored.AlgebraicTopology.Degree
+open SeedMathlib.AlgebraicTopology.Degree
 open AlgebraicTopology.StdSphereHomology
 open BorsukUlamBackup
 open BorsukUlam.BackupRoute

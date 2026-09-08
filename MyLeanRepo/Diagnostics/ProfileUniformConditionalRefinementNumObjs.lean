@@ -1,0 +1,14 @@
+import MyLeanRepo.Diagnostics.NumObjs
+import MyLeanRepo.Kakeya.Streamlined.Targets.ProfileUniformConditionalRefinement
+
+open Lean Elab Command
+
+run_cmd MyLeanRepo.Diagnostics.reportNumObjs #[
+  `Kakeya.Streamlined.ProfileUniformConditionalInitialCoverProducer,
+  `Kakeya.Streamlined.ProfileUniformConditionalFixedBudget,
+  `Kakeya.Streamlined.profile_uniform_conditional_local_dilated_discrete_uniform_refinement_main,
+  `Kakeya.Streamlined.profile_uniform_conditional_local_dilated_discrete_uniform_refinement
+]
+
+#print axioms Kakeya.Streamlined.profile_uniform_conditional_local_dilated_discrete_uniform_refinement_main
+#print axioms Kakeya.Streamlined.profile_uniform_conditional_local_dilated_discrete_uniform_refinement

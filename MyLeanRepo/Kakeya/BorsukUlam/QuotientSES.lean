@@ -17,7 +17,7 @@ import Mathlib.Topology.Homotopy.Lifting
 noncomputable section
 
 open AlgebraicTopology CategoryTheory Limits HomologicalComplex Simplicial Preadditive
-open Vendored.AlgebraicTopology.Degree
+open SeedMathlib.AlgebraicTopology.Degree
 open BorsukUlamBackup
 open BorsukUlam.BackupRoute
 

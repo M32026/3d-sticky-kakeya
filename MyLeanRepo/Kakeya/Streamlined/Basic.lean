@@ -4,7 +4,7 @@ import MyLeanRepo.Kakeya.Streamlined.Statements
 # Elementary facts for the streamlined API
 
 This module is deliberately small and contains no placeholders.  It is safe
-for every standalone target to import.
+for every standalone SeedProver target to import.
 -/
 
 noncomputable section

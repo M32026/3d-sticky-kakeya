@@ -9,8 +9,8 @@ using the Bockstein long exact sequence and the five lemma.
 -/
 
 import MyLeanRepo.Kakeya.BorsukUlam.BocksteinShortExact
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.SingularHomology.MayerVietoris.SmallChains
-import MyLeanRepo.Kakeya.BorsukUlam.Vendored.AlgebraicTopology.SingularHomology.MayerVietoris.SmallChainTransport
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.SingularHomology.MayerVietoris.SmallChains
+import MyLeanRepo.Kakeya.BorsukUlam.SeedMathlib.AlgebraicTopology.SingularHomology.MayerVietoris.SmallChainTransport
 import Mathlib.Algebra.Homology.HomologySequence
 import Mathlib.Algebra.Homology.QuasiIso
 import Mathlib.Algebra.Homology.ShortComplex.ShortExact

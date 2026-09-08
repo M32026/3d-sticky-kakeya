@@ -5,7 +5,7 @@ import MyLeanRepo.Kakeya.Assouad.Statements
 # WZ2 internal reductions with explicit black-box boundaries
 
 Each statement below proves only a WZ2-owned transition.  External analytic
-results are supplied as ordinary hypotheses, preventing proof runs from
+results are supplied as ordinary hypotheses, preventing SeedProver runs from
 silently re-formalizing CV, OSW, or PYZ.
 -/
 
